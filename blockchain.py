@@ -79,11 +79,13 @@ def mine_block():
         'recipient': owner,
         'amount': MINING_REWARD
     }
-    open_transactions.append(reward_transaction)
+    copied_transactions = open_transactions[:]  """[:] known as Shallow copying helps to copy the entire list by value, not by reference. 
+    Not recommended when the list contains more datastructures inside"""
+    copied_transactions.append(reward_transaction)
     block = {
         'previous_hash': hashed_block,
         'index': len(blockchain),
-        'transaction': open_transactions
+        'transaction': copied_transactions
     }
     blockchain.append(block)
     return True
