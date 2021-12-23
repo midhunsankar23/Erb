@@ -1,3 +1,7 @@
+import functools
+import hashlib
+import json
+
 # The reward we give to miners (for creating a new block)
 MINING_REWARD = 10
 
@@ -23,7 +27,7 @@ def hash_block(block):
     Arguments:
         :block: The block that should be hashed.
     """
-    return '-'.join([str(block[key]) for key in block])
+    return hashlib.sha256(json.dumps(block).encode()).hexdigest()
 
 
 def get_balance(participant):
@@ -39,20 +43,12 @@ def get_balance(participant):
     # This fetches sent amounts of open transactions (to avoid double spending)
     open_tx_sender = [tx['amount'] for tx in open_transactions if tx['sender'] == participant]
     tx_sender.append(open_tx_sender)
-    amount_sent = 0
-    # Calculate the total amount of coins sent
-    for tx in tx_sender:
-        if len(tx) > 0:
-            amount_sent += tx[0]
+    amount_sent = functools.reduce(lambda tx_sum, tx_amt: tx_sum + sum(tx_amt) if len(tx_amt) > 0 else tx_sum + 0, tx_sender, 0)
     # This fetches received coin amounts of transactions that were already included in blocks of the blockchain
     # We ignore open transactions here because you shouldn't be able to spend coins before the transaction was confirmed + included in a block
     tx_recipient = [[tx['amount'] for tx in block['transactions'] if tx['recipient'] == participant] for block in
                     blockchain]
-    amount_received = 0
-    for tx in tx_recipient:
-        if len(tx) > 0:
-            amount_received += tx[0]
-    # Return the total balance
+    amount_received = functools.reduce(lambda tx_sum, tx_amt: tx_sum + sum(tx_amt) if len(tx_amt) > 0 else tx_sum + 0, tx_recipient, 0)
     return amount_received - amount_sent
 
 
@@ -105,6 +101,7 @@ def mine_block():
     last_block = blockchain[-1]
     # Hash the last block (=> to be able to compare it to the stored hash value)
     hashed_block = hash_block(last_block)
+    print(hashed_block)
     # Miners should be rewarded, so let's create a reward transaction
     reward_transaction = {
         'sender': 'MINING',
