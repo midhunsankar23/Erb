@@ -1,7 +1,8 @@
 import functools
-import hashlib as hl
-import json
 from collections import OrderedDict
+import json
+
+from hash_util import hash_string_256, hash_block
 
 # The reward we give to miners (for creating a new block)
 MINING_REWARD = 10
@@ -23,18 +24,41 @@ owner = 'Max'
 participants = {'Max'}
 
 
-def hash_block(block):
-    """Hashes a block and returns a string representation of it.
+def load_data():
+    with open('blockchain.txt', mode='r') as f:
+        file_content = f.readlines()
+        global blockchain
+        global open_transactions
+        blockchain = json.loads(file_content[0][:-1])
+        updated_blockchain = []
+        for block in blockchain:
+            updated_block = {
+                'previous_hash': block['previous_hash'],
+                'index': block['index'],
+                'transactions': [OrderedDict([('sender',tx['sender']), ('recipient',tx['recipient']),('amount',tx['amount'])]) for tx in block['transactions']],
+                'proof': block['proof']
+            }
+            updated_blockchain.append(updated_block)
+        blockchain = updated_blockchain
+        open_transactions = json.loads(file_content[1])
+        updated_transactions = []
+        for tx in open_transactions:
+            updated_transaction = OrderedDict([('sender',tx['sender']), ('recipient',tx['recipient']),('amount',tx['amount'])])
+            updated_transactions.append(updated_transaction)
+        open_transactions = updated_transactions
 
-    Arguments:
-        :block: The block that should be hashed.
-    """
-    return hl.sha256(json.dumps(block, sort_keys= True).encode()).hexdigest()
+load_data()
 
+
+def save_data():
+    with open('blockchain.txt', mode='w') as f:
+        f.write(json.dumps(blockchain))
+        f.write('\n')
+        f.write(json.dumps(open_transactions))
 
 def valid_proof(transaction, lasthash, proof):
     guess = (str(transaction) + str(lasthash) + str(proof)).encode()
-    guess_hash = hl.sha256(guess).hexdigest()
+    guess_hash = hash_string_256(guess)
     print(guess_hash)
     return guess_hash[0:2] == '00'
 
@@ -109,6 +133,7 @@ def add_transaction(recipient, sender=owner, amount=1.0):
         open_transactions.append(transaction)
         participants.add(sender)
         participants.add(recipient)
+        save_data()
         return True
     return False
 
@@ -208,6 +233,7 @@ while waiting_for_input:
     elif user_choice == '2':
         if mine_block():
             open_transactions = []
+            save_data()
     elif user_choice == '3':
         print_blockchain_elements()
     elif user_choice == '4':
