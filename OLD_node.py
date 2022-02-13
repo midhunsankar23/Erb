@@ -5,6 +5,12 @@ from utility.verification import Verification
 from wallet import Wallet
 
 class Node:
+    """The node which runs the local blockchain instance.
+    
+    Attributes:
+        :id: The id of the node.
+        :blockchain: The blockchain which is run by this node.
+    """
     def __init__(self):
         # self.id = str(uuid4())
         self.wallet = Wallet()
@@ -33,6 +39,7 @@ class Node:
             print('-' * 20)
 
     def listen_for_input(self):
+        """Starts the node and waits for user input."""
         waiting_for_input = True
 
         # A while loop for the user input interface
@@ -60,7 +67,7 @@ class Node:
                 print(self.blockchain.get_open_transactions())
             elif user_choice == '2':
                 if not self.blockchain.mine_block():
-                    print('Mining failed!')
+                    print('Mining failed. Got no wallet?')
             elif user_choice == '3':
                 self.print_blockchain_elements()
             elif user_choice == '4':
@@ -92,5 +99,6 @@ class Node:
 
         print('Done!')
 
-node = Node()
-node.listen_for_input()
+if __name__ == '__main__':
+    node = Node()
+    node.listen_for_input()
