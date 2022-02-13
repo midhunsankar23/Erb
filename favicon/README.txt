@@ -1,0 +1,1 @@
+Just favicon files
