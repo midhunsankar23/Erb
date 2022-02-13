@@ -5,7 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
-    <title>Blockchain Management</title>
+    <title>Erb Blockchain Management</title>
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.0/css/bootstrap.min.css" integrity="sha384-9gVQ4dYFwwWSjIDZnLEWnxCjeSWFphJiwGPXr1jddIhOegiu1FwO5qRGvFXOdJZ4"
         crossorigin="anonymous">
     <style>
@@ -60,6 +60,19 @@
                     <h1>Manage your Erb Blockchain</h1>
                 </div>
             </div>
+            <div class="row">
+                <div class="col">
+                    <ul class="nav nav-pills">
+                        <li class="nav-item">
+                            <a class="nav-link active" href="/">Wallet &amp; Node</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="/network">Network</a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+            <hr>
             <div v-if="error" class="alert alert-danger" role="alert">
                 {{ error }}
             </div>
@@ -133,6 +146,7 @@
                 <div class="col">
                     <button class="btn btn-primary" @click="onLoadData">{{ view === 'chain' ? 'Load Blockchain' : 'Load Transactions' }}</button>
                     <button v-if="view === 'chain' && wallet" class="btn btn-success" @click="onMine">Mine Coins</button>
+                    <button class="btn btn-warning" @click="onResolve">Resolve Conflicts</button>
                 </div>
             </div>
             <div class="row">
@@ -196,12 +210,8 @@
         new Vue({
             el: '#app',
             data: {
-                blockchain: [
-                    
-                ],
-                openTransactions: [
-                    
-                ],
+                blockchain: [],
+                openTransactions: [],
                 wallet: null,
                 view: 'chain',
                 walletLoading: false,
@@ -221,7 +231,7 @@
                     if (this.view === 'chain') {
                         return this.blockchain;
                     } else {
-                        return this.openTransactions
+                        return this.openTransactions;
                     }
                 }
             },
@@ -229,46 +239,46 @@
                 onCreateWallet: function () {
                     // Send Http request to create a new wallet (and return keys)
                     var vm = this;
-                    vm.walletLoading = true;
-                    axios.post('/wallet') 
+                    this.walletLoading = true
+                    axios.post('/wallet')
                         .then(function (response) {
                             vm.error = null;
-                            vm.success = 'Created wallet! Public key: ' + response.data.public_key + ', Private key: ' + response.data.private_key;
+                            vm.success = 'Created Wallet! Public Key: ' + response.data.public_key + ', Private Key: ' + response.data.private_key;
                             vm.wallet = {
-                                public_key : response.data.public_key,
-                                private_key : response.data.private_key
+                                public_key: response.data.public_key,
+                                private_key: response.data.private_key
                             }
-                            vm.walletLoading = false;
-                            vm.funds = response.data.funds
+                            vm.funds = response.data.funds;
+                            vm.walletLoading = false
                         })
-                        .catch(function(error){
+                        .catch(function (error) {
                             vm.success = null;
-                            vm.error = error.data.message;
-                            vm.wallet = null;
-                            vm.walletLoading = false;
-                        })
+                            vm.error = error.response.data.message
+                            vm.wallet = null
+                            vm.walletLoading = false
+                        });
                 },
                 onLoadWallet: function () {
                     // Send Http request to load an existing wallet (from a file on the server)
                     var vm = this;
-                    this.walletLoading = true;
+                    this.walletLoading = true
                     axios.get('/wallet')
-                    .then(function (response) {
+                        .then(function (response) {
                             vm.error = null;
-                            vm.success = 'Loaded wallet! Public key: ' + response.data.public_key + ', Private key: ' + response.data.private_key;
+                            vm.success = 'Created Wallet! Public Key: ' + response.data.public_key + ', Private Key: ' + response.data.private_key;
                             vm.wallet = {
-                                public_key : response.data.public_key,
-                                private_key : response.data.private_key
+                                public_key: response.data.public_key,
+                                private_key: response.data.private_key
                             }
-                            vm.walletLoading = false;
                             vm.funds = response.data.funds;
+                            vm.walletLoading = false;
                         })
-                        .catch(function(error){
+                        .catch(function (error) {
                             vm.success = null;
                             vm.error = error.response.data.message;
                             vm.wallet = null;
                             vm.walletLoading = false;
-                        })
+                        });
                 },
                 onSendTx: function () {
                     // Send Transaction to backend
@@ -278,61 +288,71 @@
                         recipient: this.outgoingTx.recipient,
                         amount: this.outgoingTx.amount
                     })
-                    .then(function(response){
-                            vm.error = null;
-                            vm.success = response.data.message;
-                            console.log(response.data);
-                            vm.funds = response.data.funds;
-                            vm.txLoading = false;
-                        })
-                    .catch(function(error){
-                        vm.success = false;
-                        vm.error = error.response.data.message;
+                    .then(function(response) {
+                        vm.error = null;
+                        vm.success = response.data.message;
+                        console.log(response.data);
+                        vm.funds = response.data.funds;
                         vm.txLoading = false;
                     })
+                    .catch(function (error) {
+                        vm.success = null;
+                        vm.error = error.response.data.message;
+                        vm.txLoading = false;
+                    });
                 },
-                onMine: function() {
-                    var vm = this;
+                onMine: function () {
+                    var vm = this
                     axios.post('/mine')
-                        .then(function(response){
+                        .then(function(response) {
                             vm.error = null;
                             vm.success = response.data.message;
                             console.log(response.data);
                             vm.funds = response.data.funds;
                         })
-                        .catch(function(error){
-                            vm.success = false;
+                        .catch(function (error) {
+                            vm.success = null;
                             vm.error = error.response.data.message;
+                        });
+                },
+                onResolve: function() {
+                    var vm = this
+                    axios.post('/resolve-conflicts')
+                        .then(function(response) {
+                            vm.error = null;
+                            vm.success = response.data.message;
                         })
+                        .catch(function (error) {
+                            vm.success = null;
+                            vm.error = error.response.data.message;
+                        });
                 },
                 onLoadData: function () {
                     if (this.view === 'chain') {
                         // Load blockchain data
-                        // VM is view model
                         var vm = this
                         this.dataLoading = true
                         axios.get('/chain')
-                            .then(function(response) {
+                            .then(function (response) {
                                 vm.blockchain = response.data
                                 vm.dataLoading = false
                             })
-                            .catch(function(error){
+                            .catch(function (error) {
                                 vm.dataLoading = false
                                 vm.error = 'Something went wrong.'
-                            })
+                            });
                     } else {
                         // Load transaction data
                         var vm = this
-                        this.dataLoading = true
                         axios.get('/transactions')
-                            .then(function(response) {
+                            .then(function (response) {
                                 vm.openTransactions = response.data
                                 vm.dataLoading = false
                             })
-                            .catch(function(error){
+                            .catch(function (error) {
                                 vm.dataLoading = false
                                 vm.error = 'Something went wrong.'
-                            })
+                            });
                     }
                 }
             }
