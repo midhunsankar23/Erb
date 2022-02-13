@@ -4,6 +4,7 @@ from utility.hash_util import hash_string_256, hash_block
 from wallet import Wallet
 
 class Verification:
+    """A helper class which offer various static and class-based verification and validation methods."""
     @staticmethod
     def valid_proof(transactions, last_hash, proof):
         """Validate a proof of work number and see if it solves the puzzle algorithm (two leading 0s)
@@ -43,7 +44,7 @@ class Verification:
             :transaction: The transaction that should be verified.
         """
         if check_funds:
-            sender_balance = get_balance()
+            sender_balance = get_balance(transaction.sender)
             return sender_balance >= transaction.amount and Wallet.verify_transaction(transaction)
         else:
             return Wallet.verify_transaction(transaction)
