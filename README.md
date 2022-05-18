@@ -6,24 +6,24 @@
 ------------
 
 
-Fork/Clone/Download this repo 
+1. Fork/Clone/Download this repo 
 	
 
     git clone https://github.com/midhunsankar23/Erb.git
-Navigate to the directory 
+2. Navigate to the directory 
 	
 
     cd Erb
-Create a virtual environment for this project, requires Anaconda
+3. Create a virtual environment for this project, requires Anaconda
 
      On Linux and macOS: conda env create -f erbenv.yml 
      On Windows: use the import environment option
-Load the virtual environment 
+4. Load the virtual environment 
 
 
     On Linux and macOS: conda activate erbenv 
     On Windows: conda activate erbenv
-Run the node.py script in one of two ways 
+5. Run the node.py script in one of two ways 
 
 
      1. python3 node.py 
