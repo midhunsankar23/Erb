@@ -1,7 +1,7 @@
 # **Erb**
 **Erb** is a simple cryptocurrency made on top of Blockchain technology
 
-**Installation ⚙️**
+### **Installation ⚙️**
 
 ------------
 
