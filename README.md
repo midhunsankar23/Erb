@@ -26,9 +26,10 @@ Load the virtual environment
 Run the node.py script in one of two ways 
 
 
-     python3 node.py 
-     Or execute your command straight away python3 node.py -p 
+     1. python3 node.py 
+     2. Or execute your command straight away python3 node.py -p 
      Example: python node.py -p 5001
+	 
 	 
 
 ------------
